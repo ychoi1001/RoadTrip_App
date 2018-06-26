@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geolocation</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="mdl/material.min.css">
+    <script src="mdl/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 90%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+      
+          <div class="mdl-textfield mdl-js-textfield"  style="width:190px; margin-left:10px;">
+            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="trackEverySecond">
+            <label class="mdl-textfield__label" for="sample2">Track every (...) second</label>
+            <span class="mdl-textfield__error">Input is not a number!</span>
+          </div>
+      
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="startTracking();" style="margin:10px;">
+          Start tracking
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="stopTracking();" style="margin:10px;">
+            Stop tracking
+          </button>
+    <div id="map">
+      
+    </div>
+    <script>
+      // Note: This example requires that you consent to location sharing when
+      // prompted by your browser. If you see the error "The Geolocation service
+      // failed.", it means you probably did not give permission for the browser to
+      // locate you.
+
+      var map, infoWindow;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 0.011987, lng: -81.200276},
+          zoom: 14
+        });
+        showCurrentLocation();
+      }
+      function showCurrentLocation(){
+        infoWindow = new google.maps.InfoWindow;
+        var time=Date();
+        var res = time.substring(0, 24); //get rid of unnecessary string
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            infoWindow.setPosition(pos);
+            //infoWindow.setContent('Where I am!' + '<br>Latitude: ' + position.coords.latitude + '<br>Longitude: ' + position.coords.longitude);
+            infoWindow.setContent(res);
+            infoWindow.open(map);
+            map.setCenter(pos);
+            
+            var user = firebase.auth().currentUser;
+ 
+            var itemId = firebase.database().ref("users/"+user.uid).child("MY_Latitude_Longitude").push();
+            
+            itemId.set({
+              latitude:position.coords.latitude,
+              longitude:position.coords.longitude,
+              date:time
+            }).then(function(){
+                console.log('Success');
+            }).catch(function(error){
+                console.error('Error occured');
+            });
+
+          }, function() {
+            handleLocationError(true, infoWindow, map.getCenter());
+          });
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
+        }
+      }
+      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+                              'Error: The Geolocation service failed.' :
+                              'Error: Your browser doesn\'t support geolocation.');
+        infoWindow.open(map);
+      }
+
+      var t;
+      var tracking_is_on = 0;
+      function tracking(){
+        showCurrentLocation();
+        var everyScond=document.getElementById('trackEverySecond').value * 1000;  
+        t = setTimeout(function(){ tracking() }, everyScond);
+     }
+     function startTracking() {
+        if (!tracking_is_on) {
+          tracking_is_on = 1;
+          tracking();
+        }
+     }
+
+    function stopTracking() {
+        clearTimeout(t);
+        tracking_is_on = 0;
+    }
+    </script>
+<script src="https://www.gstatic.com/firebasejs/4.8.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBl76dL2yuG1MLqGdEgY86YOdbjupGVujs",
+    authDomain: "firebsedemo-9ce94.firebaseapp.com",
+    databaseURL: "https://firebsedemo-9ce94.firebaseio.com",
+    projectId: "firebsedemo-9ce94",
+    storageBucket: "",
+    messagingSenderId: "1008795786146"
+  };
+  firebase.initializeApp(config);
+</script>
+
+
+    
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFI8jQkUP3e6YNFR47nMtG4dapYi2tJ9o&callback=initMap&callback=initMap&libraries=places" async defer></script>
+  </body>
+</html>

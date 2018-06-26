@@ -1,0 +1,41 @@
+
+.layout-transparent {
+  background: url('../img/pexels-photo-385997.jpeg') center / cover;
+}
+
+.page-title-span{
+    margin-left: 10px;
+}
+.button-right-icon{
+    margin-left:10px;
+
+}
+/*login section*/
+.login-cover{
+    background: #fff;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100vh;
+    z-index:800;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#loginProgress{
+    display: none;
+}
+
+#loginError{
+    display: none;
+}
+
+#google_sign_in{
+   margin-top:30px;
+   width:238.64px;
+   height: 36px;
+
+}
